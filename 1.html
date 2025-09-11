@@ -11,9 +11,10 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                height: 100vh;
+                min-height: 100vh;
                 margin: 0;
                 background-color: #f5f5f5;
+                padding: 20px 0;
             }
             .container {
                 text-align: center;
@@ -23,6 +24,7 @@
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                 width: 80%;
                 max-width: 600px;
+                margin-bottom: 20px;
             }
             .start-screen, .game-screen {
                 display: flex;
@@ -63,25 +65,24 @@
             }
             .image-container {
                 width: 100%;
-                max-width: 700px;
+                max-width: 600px; /* 与游戏面板同宽 */
                 background: white;
-                padding: 20px;
-                margin-top: 30px;
-                border-radius: 15px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                padding: 15px; /* 减小内边距 */
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
                 text-align: center;
             }
             
             .image-container h2 {
                 color: #2c3e50;
-                margin-bottom: 15px;
+                margin-bottom: 12px;
+                font-size: 18px; /* 减小标题字号 */
             }
             
             .keyboard-image {
                 width: 100%;
                 overflow: hidden;
-                border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
             }
             
             .keyboard-image img {
@@ -96,9 +97,9 @@
             }
             
             .image-note {
-                margin-top: 15px;
+                margin-top: 10px;
                 color: #7f8c8d;
-                font-size: 14px;
+                font-size: 12px; /* 减小备注字号 */
             }
             
             /* 设置界面样式 */
@@ -182,6 +183,7 @@
             @media (max-width: 600px) {
                 .container, .image-container {
                     padding: 20px;
+                    width: 90%;
                 }
                 
                 h1 {
@@ -198,6 +200,10 @@
                     align-items: center;
                     gap: 15px;
                 }
+                
+                .image-container h2 {
+                    font-size: 16px;
+                }
             }
         </style>
     </head>
@@ -211,14 +217,6 @@
                     <input type="number" id="gameTime" min="1" max="60" value="3">
                 </div>
                 <button class="btn" id="startBtn">开始游戏</button>
-                
-                <div class="image-container">
-                    <h2>键盘指法参考</h2>
-                    <div class="keyboard-image">
-                        <img src="https://lbzj.github.io/img/keyboard1.png" alt="键盘指法示意图">
-                    </div>
-                    <p class="image-note">图片可滚动缩放，鼠标悬停有放大效果</p>
-                </div>
             </div>
             
             <!-- 游戏界面 -->
@@ -234,6 +232,15 @@
                 </div>
                 <div class="instructions">按下键盘上对应的按键来匹配显示的字符</div>
             </div>
+        </div>
+
+        <!-- 键盘指法参考（始终显示） -->
+        <div class="image-container" id="keyboardReference">
+            <h2>键盘指法参考</h2>
+            <div class="keyboard-image">
+                <img src="https://lbzj.github.io/img/keyboard1.png" alt="键盘指法示意图">
+            </div>
+            <p class="image-note">鼠标悬停可放大查看细节</p>
         </div>
 
         <!-- 结束弹窗 -->
@@ -288,6 +295,7 @@
             const finalWrongElement = document.getElementById("finalWrong");
             const finalAccuracyElement = document.getElementById("finalAccuracy");
             const restartBtn = document.getElementById("restartBtn");
+            const keyboardReference = document.getElementById("keyboardReference");
 
             // 随机选择一个字符
             function getRandomChar() {
