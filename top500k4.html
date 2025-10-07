@@ -281,6 +281,7 @@
         let totalWords = 0;
         let correctWords = 0;
         let practiceStarted = false;
+        let nextIndex = -1;
 
         // DOM元素
         const currentWordElement = document.getElementById('current-word');
@@ -330,6 +331,7 @@
             startTime = new Date();
             totalWords = 0;
             correctWords = 0;
+            nextIndex = -1;
             updateStats();
             nextWord();
             codeInput.focus();
@@ -354,8 +356,12 @@
         // 获取下一个汉字
         function nextWord() {
             const words = Object.keys(codeTable);
-            const randomIndex = Math.floor(Math.random() * words.length);
-            currentWord = words[randomIndex];
+            //const randomIndex = Math.floor(Math.random() * words.length);
+            nextIndex++;
+            if(nextIndex == words.length) {
+                nextIndex = 0;
+            }
+            currentWord = words[nextIndex];
             currentWordElement.textContent = currentWord;
             codeInput.value = "";
             feedbackElement.textContent = "";
