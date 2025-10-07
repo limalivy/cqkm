@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超强快码二级简码练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .practice-area {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .current-word {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #2c3e50;
+            font-weight: bold;
+            min-height: 60px;
+        }
+
+        .input-area {
+            margin: 20px 0;
+        }
+
+        #code-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            letter-spacing: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #code-input:focus {
+            border-color: #3498db;
+        }
+
+        .feedback {
+            margin: 15px 0;
+            min-height: 24px;
+            font-size: 16px;
+        }
+
+        .correct {
+            color: #27ae60;
+        }
+
+        .incorrect {
+            color: #e74c3c;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .code-table-section {
+            margin-top: 30px;
+        }
+
+        .code-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .code-table th,
+        .code-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .code-table th {
+            background-color: #f2f2f2;
+        }
+
+        .custom-table {
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>超强快码二级简码练习（top500）</h1>
+        <p class="description">超强快码二级简码，提高打字速度和准确率</p>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">准确率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="speed">0</div>
+                <div class="stat-label">字/分钟</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total">0</div>
+                <div class="stat-label">已练习</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="correct">0</div>
+                <div class="stat-label">正确</div>
+            </div>
+        </div>
+
+        <div class="practice-area">
+            <div class="current-word" id="current-word">准备开始</div>
+            <div class="input-area">
+                <input type="text" id="code-input" placeholder="输入二级简码" autocomplete="off">
+            </div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="buttons">
+            <button id="start-btn">开始练习</button>
+            <button id="reset-btn">重置统计</button>
+        </div>
+
+        <div class="code-table-section">
+            <h2>二级简码表</h2>
+            <table class="code-table" id="code-table">
+                <!-- 码表将通过JavaScript动态生成 -->
+            </table>
+
+            <div class="custom-table">
+                <h3>自定义码表</h3>
+                <textarea id="custom-codes" placeholder="每行输入一个汉字和对应的二级简码，格式：汉字=编码，例如：啊=KB"></textarea>
+                <button id="update-btn">更新码表</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>点击"开始练习"按钮开始练习</li>
+                <li>在输入框中输入显示的汉字对应的二级简码</li>
+                <li>按回车键或输入正确编码后自动进入下一个汉字</li>
+                <li>准确率和打字速度会实时更新</li>
+                <li>可以自定义码表进行个性化练习</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 默认二级简码表
+        let codeTable = {
+            "来": "ll",
+            "说": "si",
+            "上": "sf",
+            "到": "dk",
+            "着": "zy",
+            "大": "dh",
+            "道": "dy",
+            "那": "nv",
+            "地": "dl",
+            "子": "zn",
+            "下": "xm",
+            "出": "cn",
+            "时": "sn",
+            "看": "kr",
+            "要": "ua",
+            "她": "tb",
+            "中": "zd",
+            "没": "ms",
+            "然": "re",
+            "里": "ld",
+            "过": "gm",
+            "自": "uq",
+            "好": "hb",
+            "得": "di",
+            "去": "ql",
+            "会": "uf",
+            "天": "tj",
+            "还": "hh",
+            "后": "ht",
+            "小": "xk",
+            "都": "dm",
+            "对": "dx",
+            "能": "nx",
+            "之": "zi",
+            "手": "su",
+            "只": "zg",
+            "生": "sr",
+            "身": "sq",
+            "头": "to",
+            "样": "yf",
+            "多": "de",
+            "家": "jo",
+            "面": "mh",
+            "知": "zr",
+            "开": "kj",
+            "如": "rb",
+            "无": "wj",
+            "现": "xj",
+            "很": "hi",
+            "点": "df",
+            "前": "qy",
+            "发": "fb",
+            "经": "jc",
+            "情": "qo",
+            "把": "bu",
+            "些": "xf",
+            "已": "yv",
+            "又": "yx",
+            "意": "yu",
+            "于": "uw",
+            "回": "hd",
+            "所": "st",
+            "眼": "yd",
+            "方": "fu",
+            "年": "nr",
+            "见": "jd",
+            "两": "lm",
+            "力": "lb",
+            "气": "qr",
+            "从": "ch",
+            "用": "ye",
+            "长": "cr",
+            "动": "dj",
+            "间": "jp",
+            "国": "gd",
+            "走": "zl",
+            "让": "ri",
+            "被": "bi",
+            "给": "gc",
+            "正": "uz",
+            "问": "wp",
+            "打": "du",
+            "明": "mn",
+            "儿": "ee",
+            "法": "fs",
+            "才": "cm",
+            "行": "xi",
+            "三": "sj",
+            "定": "do",
+            "此": "cf",
+            "进": "jj",
+            "再": "zm",
+            "种": "uv",
+            "将": "ju",
+            "实": "so",
+            "同": "td",
+            "本": "bm",
+            "向": "xq",
+            "十": "sm",
+            "学": "xo",
+            "高": "gu",
+            "第": "ud",
+            "感": "gh",
+            "听": "tg",
+            "边": "bb",
+            "其": "qm",
+            "吧": "ub",
+            "口": "kg",
+            "啊": "ag",
+            "白": "bq",
+            "次": "cu",
+            "军": "ji",
+            "做": "zh",
+            "外": "we",
+            "门": "mp",
+            "光": "gk",
+            "风": "fe",
+            "主": "zu",
+            "与": "yk",
+            "全": "qh",
+            "二": "ej",
+            "公": "gw",
+            "吗": "mg",
+            "等": "dr",
+            "别": "bg",
+            "色": "se",
+            "张": "zv",
+            "太": "th",
+            "日": "rn",
+            "少": "sk",
+            "理": "lj",
+            "重": "uc",
+            "脸": "lc",
+            "比": "bk",
+            "快": "ko",
+            "水": "ss",
+            "名": "me",
+            "体": "ug",
+            "呢": "ng",
+            "叫": "jg",
+            "应": "uu",
+            "便": "bh",
+            "马": "mc",
+            "美": "my",
+            "位": "wh",
+            "关": "gy",
+            "机": "jf",
+            "先": "xr",
+            "文": "wu",
+            "处": "ce",
+            "并": "by",
+            "完": "wo",
+            "四": "sd",
+            "安": "ao",
+            "清": "qs",
+            "跟": "gg",
+            "月": "yc",
+            "信": "xh",
+            "爱": "aw",
+            "内": "nd",
+            "龙": "lh",
+            "入": "rw",
+            "连": "lk",
+            "吃": "cg",
+            "场": "cl",
+            "林": "lf",
+            "使": "sh",
+            "受": "sw",
+            "亲": "qu",
+            "目": "md",
+            "强": "qv",
+            "任": "rh",
+            "该": "gi",
+            "车": "ck",
+            "加": "jb",
+            "远": "yj",
+            "活": "hs",
+            "特": "tr",
+            "电": "dd",
+            "表": "bj",
+            "红": "hc",
+            "花": "ha",
+            "队": "dn",
+            "孩": "hn",
+            "反": "ft",
+            "始": "sb",
+            "新": "xu",
+            "物": "wr",
+            "非": "ff",
+            "虽": "sg",
+            "万": "wk",
+            "至": "zk",
+            "干": "gj",
+            "通": "tx",
+            "火": "hy",
+            "士": "sl",
+            "五": "wm",
+            "乎": "hw",
+            "往": "wi",
+            "量": "ln",
+            "怕": "po",
+            "流": "ls",
+            "紧": "ja",
+            "且": "qd",
+            "利": "lr",
+            "书": "sc",
+            "步": "bf",
+            "教": "jm",
+            "越": "yl",
+            "告": "gr",
+            "落": "la",
+            "象": "xe",
+            "容": "ro",
+            "提": "tu",
+            "每": "mr",
+            "双": "sx",
+            "服": "fc",
+            "数": "sy",
+            "房": "fi",
+            "灵": "lv",
+            "题": "tn",
+            "拿": "ui",
+            "妈": "mb",
+            "般": "bt",
+            "精": "jy",
+            "近": "jt",
+            "条": "te",
+            "青": "qj",
+            "司": "sv",
+            "欢": "hx",
+            "字": "zo",
+            "晚": "wn",
+            "民": "mv",
+            "忙": "mo",
+            "或": "hk",
+            "夫": "fj",
+            "员": "yg",
+            "根": "gf",
+            "阿": "an",
+            "片": "pq",
+            "南": "nm",
+            "请": "qi",
+            "各": "ge",
+            "语": "yi",
+            "错": "cj",
+            "苦": "ka",
+            "若": "ra",
+            "消": "xs",
+            "留": "le",
+            "显": "xn",
+            "官": "go",
+            "论": "li",
+            "害": "ho",
+            "八": "bw",
+            "久": "ue",
+            "脑": "nc",
+            "响": "xg",
+            "刀": "db",
+            "江": "js",
+        };
+
+        // 练习状态变量
+        let currentWord = "";
+        let startTime = null;
+        let totalWords = 0;
+        let correctWords = 0;
+        let practiceStarted = false;
+
+        // DOM元素
+        const currentWordElement = document.getElementById('current-word');
+        const codeInput = document.getElementById('code-input');
+        const feedbackElement = document.getElementById('feedback');
+        const accuracyElement = document.getElementById('accuracy');
+        const speedElement = document.getElementById('speed');
+        const totalElement = document.getElementById('total');
+        const correctElement = document.getElementById('correct');
+        const startButton = document.getElementById('start-btn');
+        const resetButton = document.getElementById('reset-btn');
+        const updateButton = document.getElementById('update-btn');
+        const customCodesTextarea = document.getElementById('custom-codes');
+        const codeTableElement = document.getElementById('code-table');
+
+        // 初始化码表显示
+        function initCodeTable() {
+            // 清空表格
+            codeTableElement.innerHTML = '';
+
+            // 创建表头
+            const headerRow = document.createElement('tr');
+            const header1 = document.createElement('th');
+            header1.textContent = '汉字';
+            const header2 = document.createElement('th');
+            header2.textContent = '二级简码';
+            headerRow.appendChild(header1);
+            headerRow.appendChild(header2);
+            codeTableElement.appendChild(headerRow);
+
+            // 添加码表数据
+            for (const [word, code] of Object.entries(codeTable)) {
+                const row = document.createElement('tr');
+                const cell1 = document.createElement('td');
+                cell1.textContent = word;
+                const cell2 = document.createElement('td');
+                cell2.textContent = code;
+                row.appendChild(cell1);
+                row.appendChild(cell2);
+                codeTableElement.appendChild(row);
+            }
+        }
+
+        // 开始练习
+        function startPractice() {
+            practiceStarted = true;
+            startTime = new Date();
+            totalWords = 0;
+            correctWords = 0;
+            updateStats();
+            nextWord();
+            codeInput.focus();
+            startButton.textContent = "练习中...";
+            startButton.disabled = true;
+        }
+
+        // 重置统计
+        function resetStats() {
+            practiceStarted = false;
+            startTime = null;
+            totalWords = 0;
+            correctWords = 0;
+            updateStats();
+            currentWordElement.textContent = "准备开始";
+            feedbackElement.textContent = "";
+            codeInput.value = "";
+            startButton.textContent = "开始练习";
+            startButton.disabled = false;
+        }
+
+        // 获取下一个汉字
+        function nextWord() {
+            const words = Object.keys(codeTable);
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex];
+            currentWordElement.textContent = currentWord;
+            codeInput.value = "";
+            feedbackElement.textContent = "";
+            codeInput.focus();
+        }
+
+        // 检查输入
+        function checkInput() {
+            if (!practiceStarted) return;
+
+            const inputCode = codeInput.value.toLowerCase();
+            const correctCode = codeTable[currentWord];
+
+            if (inputCode === correctCode) {
+                // 输入正确
+                feedbackElement.textContent = "正确!";
+                feedbackElement.className = "feedback correct";
+                correctWords++;
+                totalWords++;
+                updateStats();
+                setTimeout(nextWord, 300);
+            } else if (inputCode.length >= correctCode.length) {
+                // 输入错误
+                feedbackElement.textContent = `错误! 正确编码: ${correctCode}`;
+                feedbackElement.className = "feedback incorrect";
+                totalWords++;
+                updateStats();
+                setTimeout(() => {
+                    codeInput.value = "";
+                    feedbackElement.textContent = "";
+                }, 1000);
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            // 更新准确率
+            const accuracy = totalWords === 0 ? 100 : Math.round((correctWords / totalWords) * 100);
+            accuracyElement.textContent = `${accuracy}%`;
+
+            // 更新速度
+            if (startTime && totalWords > 0) {
+                const currentTime = new Date();
+                const elapsedMinutes = (currentTime - startTime) / 60000;
+                const speed = Math.round(totalWords / elapsedMinutes);
+                speedElement.textContent = speed;
+            } else {
+                speedElement.textContent = "0";
+            }
+
+            // 更新总数和正确数
+            totalElement.textContent = totalWords;
+            correctElement.textContent = correctWords;
+        }
+
+        // 更新码表
+        function updateCodeTable() {
+            const customCodesText = customCodesTextarea.value.trim();
+            if (!customCodesText) return;
+
+            const lines = customCodesText.split('\n');
+            const newCodeTable = {};
+
+            for (const line of lines) {
+                const parts = line.split('=');
+                if (parts.length === 2) {
+                    const word = parts[0].trim();
+                    const code = parts[1].trim().toUpperCase();
+                    if (word && code) {
+                        newCodeTable[word] = code;
+                    }
+                }
+            }
+
+            if (Object.keys(newCodeTable).length > 0) {
+                codeTable = newCodeTable;
+                initCodeTable();
+                resetStats();
+                alert("码表已更新!");
+            } else {
+                alert("未找到有效的码表数据，请检查格式!");
+            }
+        }
+
+        // 事件监听
+        startButton.addEventListener('click', startPractice);
+        resetButton.addEventListener('click', resetStats);
+        updateButton.addEventListener('click', updateCodeTable);
+
+        codeInput.addEventListener('input', checkInput);
+        codeInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                checkInput();
+            }
+        });
+
+        // 初始化
+        initCodeTable();
+        resetStats();
+
+        // 将默认码表显示在自定义码表文本区域
+        let defaultCodesText = "";
+        for (const [word, code] of Object.entries(codeTable)) {
+            defaultCodesText += `${word}=${code}\n`;
+        }
+        customCodesTextarea.value = defaultCodesText;
+    </script>
+</body>
+
+</html>
