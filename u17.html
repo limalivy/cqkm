@@ -360,12 +360,8 @@
         // 获取下一个汉字
         function nextWord() {
             const words = Object.keys(codeTable);
-            //const randomIndex = Math.floor(Math.random() * words.length);
-            nextIndex++;
-            if (nextIndex == words.length) {
-                nextIndex = 0;
-            }
-            currentWord = words[nextIndex];
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex];
             currentWordElement.textContent = currentWord;
             codeInput.value = "";
             feedbackElement.textContent = "";
