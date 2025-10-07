@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超强快码四码练习</title>
+    <script src="nav.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .practice-area {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .current-word {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #2c3e50;
+            font-weight: bold;
+            min-height: 60px;
+        }
+
+        .input-area {
+            margin: 20px 0;
+        }
+
+        #code-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            letter-spacing: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #code-input:focus {
+            border-color: #3498db;
+        }
+
+        .feedback {
+            margin: 15px 0;
+            min-height: 24px;
+            font-size: 16px;
+        }
+
+        .correct {
+            color: #27ae60;
+        }
+
+        .incorrect {
+            color: #e74c3c;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .code-table-section {
+            margin-top: 30px;
+        }
+
+        .code-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .code-table th,
+        .code-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .code-table th {
+            background-color: #f2f2f2;
+        }
+
+        .custom-table {
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>超强快码四码练习（top500-1000）</h1>
+        <p class="description">超强快码四码，提高打字速度和准确率</p>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">准确率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="speed">0</div>
+                <div class="stat-label">字/分钟</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total">0</div>
+                <div class="stat-label">已练习</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="correct">0</div>
+                <div class="stat-label">正确</div>
+            </div>
+        </div>
+
+        <div class="practice-area">
+            <div class="current-word" id="current-word">准备开始</div>
+            <div class="input-area">
+                <input type="text" id="code-input" placeholder="输入四码" autocomplete="off">
+            </div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="buttons">
+            <button id="start-btn">开始练习</button>
+            <button id="reset-btn">重置统计</button>
+        </div>
+
+        <div class="code-table-section">
+            <h2>四码表</h2>
+            <table class="code-table" id="code-table">
+                <!-- 码表将通过JavaScript动态生成 -->
+            </table>
+
+            <div class="custom-table">
+                <h3>自定义码表</h3>
+                <textarea id="custom-codes" placeholder="每行输入一个汉字和对应的四码，格式：汉字=编码，例如：啊=KB"></textarea>
+                <button id="update-btn">更新码表</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>点击"开始练习"按钮开始练习</li>
+                <li>在输入框中输入显示的汉字对应的四码</li>
+                <li>按回车键或输入正确编码后自动进入下一个汉字</li>
+                <li>准确率和打字速度会实时更新</li>
+                <li>可以自定义码表进行个性化练习</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 默认四码表
+        let codeTable = {
+            "修": "xhet",
+            "攻": "gmri",
+            "帝": "dudd",
+            "甚": "smcc",
+            "角": "jeed",
+            "伙": "hhyh",
+            "商": "sudw",
+            "隐": "ynei",
+            "怒": "nbii",
+            "钟": "zjdd",
+            "吸": "xgei",
+            "充": "cuee",
+            "史": "sdii",
+            "据": "juvm",
+            "银": "yjvi",
+            "喊": "hghk",
+            "座": "zuhl",
+            "舞": "wrek",
+            "投": "tuex",
+            "眉": "mndk",
+            "狼": "leii",
+            "店": "dufg",
+            "抬": "tuxg",
+            "状": "zuhi",
+            "桌": "zfnf",
+            "索": "smck",
+            "湖": "hsmc",
+            "值": "zhmd",
+            "兽": "sygg",
+            "夏": "xhei",
+            "胸": "xcew",
+            "尚": "skdg",
+            "升": "srdd",
+            "叔": "sfxx",
+            "略": "ldeg",
+            "墙": "qlmd",
+            "厅": "thmm",
+        };
+
+        // 练习状态变量
+        let currentWord = "";
+        let startTime = null;
+        let totalWords = 0;
+        let correctWords = 0;
+        let practiceStarted = false;
+        let nextIndex = -1;
+
+        // DOM元素
+        const currentWordElement = document.getElementById('current-word');
+        const codeInput = document.getElementById('code-input');
+        const feedbackElement = document.getElementById('feedback');
+        const accuracyElement = document.getElementById('accuracy');
+        const speedElement = document.getElementById('speed');
+        const totalElement = document.getElementById('total');
+        const correctElement = document.getElementById('correct');
+        const startButton = document.getElementById('start-btn');
+        const resetButton = document.getElementById('reset-btn');
+        const updateButton = document.getElementById('update-btn');
+        const customCodesTextarea = document.getElementById('custom-codes');
+        const codeTableElement = document.getElementById('code-table');
+
+        // 初始化码表显示
+        function initCodeTable() {
+            // 清空表格
+            codeTableElement.innerHTML = '';
+
+            // 创建表头
+            const headerRow = document.createElement('tr');
+            const header1 = document.createElement('th');
+            header1.textContent = '汉字';
+            const header2 = document.createElement('th');
+            header2.textContent = '四码';
+            headerRow.appendChild(header1);
+            headerRow.appendChild(header2);
+            codeTableElement.appendChild(headerRow);
+
+            // 添加码表数据
+            for (const [word, code] of Object.entries(codeTable)) {
+                const row = document.createElement('tr');
+                const cell1 = document.createElement('td');
+                cell1.textContent = word;
+                const cell2 = document.createElement('td');
+                cell2.textContent = code;
+                row.appendChild(cell1);
+                row.appendChild(cell2);
+                codeTableElement.appendChild(row);
+            }
+        }
+
+        // 开始练习
+        function startPractice() {
+            practiceStarted = true;
+            startTime = new Date();
+            totalWords = 0;
+            correctWords = 0;
+            nextIndex = -1;
+            updateStats();
+            nextWord();
+            codeInput.focus();
+            startButton.textContent = "练习中...";
+            startButton.disabled = true;
+        }
+
+        // 重置统计
+        function resetStats() {
+            practiceStarted = false;
+            startTime = null;
+            totalWords = 0;
+            correctWords = 0;
+            updateStats();
+            currentWordElement.textContent = "准备开始";
+            feedbackElement.textContent = "";
+            codeInput.value = "";
+            startButton.textContent = "开始练习";
+            startButton.disabled = false;
+        }
+
+        // 获取下一个汉字
+        function nextWord() {
+            const words = Object.keys(codeTable);
+            //const randomIndex = Math.floor(Math.random() * words.length);
+            nextIndex++;
+            if (nextIndex == words.length) {
+                nextIndex = 0;
+            }
+            currentWord = words[nextIndex];
+            currentWordElement.textContent = currentWord;
+            codeInput.value = "";
+            feedbackElement.textContent = "";
+            codeInput.focus();
+        }
+
+        // 检查输入
+        function checkInput() {
+            if (!practiceStarted) return;
+
+            const inputCode = codeInput.value.toLowerCase();
+            const correctCode = codeTable[currentWord];
+
+            if (inputCode === correctCode) {
+                // 输入正确
+                feedbackElement.textContent = "正确!";
+                feedbackElement.className = "feedback correct";
+                correctWords++;
+                totalWords++;
+                updateStats();
+                setTimeout(nextWord, 300);
+            } else if (inputCode.length >= correctCode.length) {
+                // 输入错误
+                feedbackElement.textContent = `错误! 正确编码: ${correctCode}`;
+                feedbackElement.className = "feedback incorrect";
+                totalWords++;
+                updateStats();
+                setTimeout(() => {
+                    codeInput.value = "";
+                    feedbackElement.textContent = "";
+                }, 1000);
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            // 更新准确率
+            const accuracy = totalWords === 0 ? 100 : Math.round((correctWords / totalWords) * 100);
+            accuracyElement.textContent = `${accuracy}%`;
+
+            // 更新速度
+            if (startTime && totalWords > 0) {
+                const currentTime = new Date();
+                const elapsedMinutes = (currentTime - startTime) / 60000;
+                const speed = Math.round(totalWords / elapsedMinutes);
+                speedElement.textContent = speed;
+            } else {
+                speedElement.textContent = "0";
+            }
+
+            // 更新总数和正确数
+            totalElement.textContent = totalWords;
+            correctElement.textContent = correctWords;
+        }
+
+        // 更新码表
+        function updateCodeTable() {
+            const customCodesText = customCodesTextarea.value.trim();
+            if (!customCodesText) return;
+
+            const lines = customCodesText.split('\n');
+            const newCodeTable = {};
+
+            for (const line of lines) {
+                const parts = line.split('=');
+                if (parts.length === 2) {
+                    const word = parts[0].trim();
+                    const code = parts[1].trim().toUpperCase();
+                    if (word && code) {
+                        newCodeTable[word] = code;
+                    }
+                }
+            }
+
+            if (Object.keys(newCodeTable).length > 0) {
+                codeTable = newCodeTable;
+                initCodeTable();
+                resetStats();
+                alert("码表已更新!");
+            } else {
+                alert("未找到有效的码表数据，请检查格式!");
+            }
+        }
+
+        // 事件监听
+        startButton.addEventListener('click', startPractice);
+        resetButton.addEventListener('click', resetStats);
+        updateButton.addEventListener('click', updateCodeTable);
+
+        codeInput.addEventListener('input', checkInput);
+        codeInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                checkInput();
+            }
+        });
+
+        // 初始化
+        initCodeTable();
+        resetStats();
+
+        // 将默认码表显示在自定义码表文本区域
+        let defaultCodesText = "";
+        for (const [word, code] of Object.entries(codeTable)) {
+            defaultCodesText += `${word}=${code}\n`;
+        }
+        customCodesTextarea.value = defaultCodesText;
+    </script>
+</body>
+
+</html>
