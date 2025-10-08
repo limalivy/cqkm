@@ -260,20 +260,16 @@
     <script>
         // 默认四码表
         let codeTable = {
-            "怎": "zrii",
             "何": "hhmg",
-            "早": "znmm",
-            "倒": "dhka",
-            "绝": "jcen",
-            "终": "zceo",
-            "夜": "yuhe",
             "报": "bunx",
-            "急": "jeii",
             "视": "side",
-            "嘴": "zgfe",
-            "脚": "jcln",
             "德": "dimi",
-            "楚": "cfni",
+            "怎": "zrii",
+            "早": "znmm",
+            "据": "juvm",
+            "终": "zceo",
+            "商": "sudw",
+            "绝": "jcen",
         };
 
         // 练习状态变量
@@ -359,7 +355,7 @@
             const words = Object.keys(codeTable);
             //const randomIndex = Math.floor(Math.random() * words.length);
             nextIndex++;
-            if(nextIndex == words.length) {
+            if (nextIndex == words.length) {
                 nextIndex = 0;
             }
             currentWord = words[nextIndex];
