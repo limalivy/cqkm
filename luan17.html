@@ -355,7 +355,7 @@
                 // 对于错误答案，我们设置更短的复习间隔（几秒钟到几分钟后再次出现）
                 if (quality < 3) {
                     // 错误答案：在几秒到几分钟后再次出现
-                    card.nextReview = Date.now() + (5 * 1000); // 5秒后再次出现
+                    card.nextReview = Date.now() + (30 * 1000); // 5秒后再次出现
                 } else {
                     // 正确答案：按天计算
                     card.nextReview = Date.now() + card.interval * 24 * 60 * 60 * 1000;
@@ -650,4 +650,5 @@
         });
     </script>
 </body>
+
 </html>
