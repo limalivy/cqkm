@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字根记忆训练器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: #4a6ee0;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin-top: 15px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: white;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .main-area {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .radical-display {
+            font-size: 120px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .input-container {
+            margin-bottom: 25px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .key-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #e1e5eb;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .key-input:focus {
+            border-color: #4a6ee0;
+            box-shadow: 0 0 0 3px rgba(74, 110, 224, 0.2);
+        }
+        
+        .key-input.correct {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+        
+        .key-input.incorrect {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+        }
+        
+        .result-message {
+            height: 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .result-message.correct {
+            color: #10b981;
+        }
+        
+        .result-message.incorrect {
+            color: #ef4444;
+        }
+        
+        .hint-area {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 25px;
+        }
+        
+        .hint-title {
+            font-size: 0.9rem;
+            color: #4a6ee0;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .hint-text {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f8fafc;
+            padding: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a6ee0;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 3px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.85rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media (max-width: 600px) {
+            .radical-display {
+                font-size: 90px;
+                height: 120px;
+            }
+            
+            .main-area {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>字根记忆训练器</h1>
+            <p class="subtitle">按错键自动重复 • 错误字根出现更频繁</p>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="main-area">
+            <div class="radical-display" id="radical-display">?</div>
+            
+            <div class="input-container">
+                <div class="input-label" id="input-label">输入对应的按键：</div>
+                <input 
+                    type="text" 
+                    class="key-input" 
+                    id="key-input" 
+                    placeholder="按对应键..."
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    maxlength="1"
+                >
+            </div>
+            
+            <div class="result-message" id="result-message"></div>
+            
+            <div class="hint-area">
+                <div class="hint-title">使用说明</div>
+                <div class="hint-text">
+                    1. 输入当前字根对应的按键<br>
+                    2. 输入错误会增加该字根出现频次<br>
+                    3. 输入正确会自动显示下一个字根<br>
+                    4. 按回车键可手动提交答案
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="current-count">1</div>
+                <div class="stat-label">当前</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">16</div>
+                <div class="stat-label">总计</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="correct-rate">0%</div>
+                <div class="stat-label">正确率</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>基于SM-2记忆算法 • 错误字根出现更频繁</p>
+        </div>
+    </div>
+
+    <script>
+        // 字根数据 - 单按键字根
+        const radicals = [
+            { radical: '一', key: '1', meaning: '横' },
+            { radical: '丨', key: '2', meaning: '竖' },
+            { radical: '丿', key: '3', meaning: '撇' },
+            { radical: '丶', key: '4', meaning: '点' },
+            { radical: '乙', key: '5', meaning: '折' },
+            { radical: '二', key: '6', meaning: '二横' },
+            { radical: '十', key: '7', meaning: '十' },
+            { radical: '口', key: '8', meaning: '口' },
+            { radical: '日', key: '9', meaning: '日' },
+            { radical: '月', key: '0', meaning: '月' },
+            { radical: '人', key: 'r', meaning: '人' },
+            { radical: '木', key: 'm', meaning: '木' },
+            { radical: '水', key: 's', meaning: '水' },
+            { radical: '火', key: 'h', meaning: '火' },
+            { radical: '土', key: 't', meaning: '土' },
+            { radical: '金', key: 'j', meaning: '金' }
+        ];
+        
+        // SM-2算法实现
+        class SM2 {
+            calculateNextReview(quality, previous) {
+                quality = Math.max(0, Math.min(5, quality));
+                
+                const defaultPrevious = {
+                    repetitions: 0,
+                    easeFactor: 2.5,
+                    interval: 0,
+                    nextReview: Date.now()
+                };
+                
+                const card = { ...defaultPrevious, ...previous };
+                
+                if (quality >= 3) {
+                    card.repetitions += 1;
+                } else {
+                    card.repetitions = 0;
+                }
+                
+                card.easeFactor = card.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+                card.easeFactor = Math.max(1.3, card.easeFactor);
+                
+                if (quality < 3) {
+                    card.interval = 1; // 重新学习，间隔设为1天
+                } else {
+                    if (card.repetitions === 1) {
+                        card.interval = 1;
+                    } else if (card.repetitions === 2) {
+                        card.interval = 6;
+                    } else {
+                        card.interval = Math.round(card.interval * card.easeFactor);
+                    }
+                }
+                
+                // 对于错误答案，我们设置更短的复习间隔（几秒钟到几分钟后再次出现）
+                if (quality < 3) {
+                    // 错误答案：在几秒到几分钟后再次出现
+                    card.nextReview = Date.now() + (5 * 1000); // 5秒后再次出现
+                } else {
+                    // 正确答案：按天计算
+                    card.nextReview = Date.now() + card.interval * 24 * 60 * 60 * 1000;
+                }
+                
+                return card;
+            }
+            
+            getQualityForDifficulty(difficulty) {
+                const qualityMap = {
+                    'again': 0,
+                    'hard': 3,
+                    'easy': 5
+                };
+                return qualityMap[difficulty] || 4;
+            }
+        }
+        
+        // 训练器主类
+        class RadicalTrainer {
+            constructor() {
+                this.sm2 = new SM2();
+                this.radicals = radicals;
+                this.currentIndex = 0;
+                this.currentRadical = null;
+                this.stats = {
+                    totalAttempts: 0,
+                    correctAttempts: 0,
+                    currentStreak: 0,
+                    bestStreak: 0
+                };
+                
+                this.memoryStates = this.loadMemoryStates();
+                this.recentErrors = []; // 记录最近错误的字根，让它们更快出现
+                this.initElements();
+                this.bindEvents();
+                this.nextRadical();
+            }
+            
+            // 初始化DOM元素
+            initElements() {
+                this.radicalDisplay = document.getElementById('radical-display');
+                this.keyInput = document.getElementById('key-input');
+                this.resultMessage = document.getElementById('result-message');
+                this.inputLabel = document.getElementById('input-label');
+                this.progressBar = document.getElementById('progress');
+                this.currentCount = document.getElementById('current-count');
+                this.totalCount = document.getElementById('total-count');
+                this.correctRate = document.getElementById('correct-rate');
+            }
+            
+            // 绑定事件
+            bindEvents() {
+                this.keyInput.addEventListener('input', (e) => this.handleInput(e));
+                this.keyInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        this.checkAnswer();
+                    }
+                });
+                
+                // 页面加载后自动聚焦输入框
+                window.addEventListener('load', () => {
+                    this.keyInput.focus();
+                });
+            }
+            
+            // 处理输入
+            handleInput(e) {
+                const value = e.target.value.toLowerCase();
+                
+                // 如果输入不为空，立即检查答案
+                if (value.length > 0) {
+                    this.checkAnswer();
+                }
+            }
+            
+            // 加载记忆状态
+            loadMemoryStates() {
+                const storageKey = 'radicalMemoryStates';
+                const savedStates = localStorage.getItem(storageKey);
+                let states = {};
+                
+                if (savedStates) {
+                    states = JSON.parse(savedStates);
+                }
+                
+                // 确保所有字根都有状态
+                this.radicals.forEach(radical => {
+                    if (!states[radical.radical]) {
+                        states[radical.radical] = {
+                            repetitions: 0,
+                            easeFactor: 2.5,
+                            interval: 0,
+                            nextReview: Date.now(),
+                            errorCount: 0, // 添加错误次数统计
+                            lastErrorTime: 0 // 上次错误时间
+                        };
+                    }
+                });
+                
+                return states;
+            }
+            
+            // 保存记忆状态
+            saveMemoryStates() {
+                localStorage.setItem('radicalMemoryStates', JSON.stringify(this.memoryStates));
+            }
+            
+            // 获取下一个需要复习的字根
+            getNextRadical() {
+                // 首先检查是否有最近错误的字根需要优先复习
+                if (this.recentErrors.length > 0) {
+                    // 获取最近错误的字根
+                    const recentErrorRadical = this.recentErrors.shift();
+                    console.log('优先复习错误字根:', recentErrorRadical.radical);
+                    return recentErrorRadical;
+                }
+                
+                // 按下次复习时间排序，但优先显示有错误的字根
+                const now = Date.now();
+                const sortedRadicals = this.radicals
+                    .map(radical => {
+                        const state = this.memoryStates[radical.radical];
+                        // 计算优先级：错误次数越多，优先级越高
+                        const errorPriority = state.errorCount || 0;
+                        // 距离下次复习的时间（如果已经过了复习时间，则为负数）
+                        const timeUntilReview = state.nextReview - now;
+                        
+                        return {
+                            ...radical,
+                            state: state,
+                            priority: errorPriority * 1000 - timeUntilReview // 错误次数影响更大
+                        };
+                    })
+                    .sort((a, b) => b.priority - a.priority); // 优先级高的排在前面
+                
+                return sortedRadicals[0] || this.radicals[0];
+            }
+            
+            // 显示下一个字根
+            nextRadical() {
+                this.currentRadical = this.getNextRadical();
+                this.currentIndex = this.radicals.findIndex(r => r.radical === this.currentRadical.radical) + 1;
+                
+                // 更新显示
+                this.radicalDisplay.textContent = this.currentRadical.radical;
+                this.inputLabel.textContent = `输入 "${this.currentRadical.radical}" 对应的按键：`;
+                
+                // 重置输入框
+                this.keyInput.value = '';
+                this.keyInput.className = 'key-input';
+                this.keyInput.focus();
+                
+                // 清空结果消息
+                this.resultMessage.textContent = '';
+                this.resultMessage.className = 'result-message';
+                
+                // 更新进度
+                this.updateProgress();
+                this.updateStats();
+            }
+            
+            // 检查答案
+            checkAnswer() {
+                const userInput = this.keyInput.value.toLowerCase();
+                const correctKey = this.currentRadical.key.toLowerCase();
+                
+                // 更新总尝试次数
+                this.stats.totalAttempts++;
+                
+                // 检查答案是否正确
+                if (userInput === correctKey) {
+                    // 答案正确
+                    this.handleCorrectAnswer();
+                } else {
+                    // 答案错误
+                    this.handleIncorrectAnswer();
+                }
+                
+                // 保存状态
+                this.saveMemoryStates();
+                this.updateStats();
+            }
+            
+            // 处理正确答案
+            handleCorrectAnswer() {
+                // 更新统计
+                this.stats.correctAttempts++;
+                this.stats.currentStreak++;
+                this.stats.bestStreak = Math.max(this.stats.bestStreak, this.stats.currentStreak);
+                
+                // 显示正确反馈
+                this.keyInput.className = 'key-input correct';
+                this.resultMessage.textContent = '✓ 正确！自动继续...';
+                this.resultMessage.className = 'result-message correct';
+                
+                // 更新记忆状态（视为简单记住）
+                const currentState = this.memoryStates[this.currentRadical.radical];
+                const quality = this.sm2.getQualityForDifficulty('easy');
+                const newState = this.sm2.calculateNextReview(quality, currentState);
+                
+                // 重置错误次数（因为回答正确了）
+                newState.errorCount = 0;
+                this.memoryStates[this.currentRadical.radical] = newState;
+                
+                // 延迟后显示下一个字根
+                setTimeout(() => {
+                    this.nextRadical();
+                }, 800);
+            }
+            
+            // 处理错误答案
+            handleIncorrectAnswer() {
+                // 更新统计
+                this.stats.currentStreak = 0;
+                
+                // 显示错误反馈
+                this.keyInput.className = 'key-input incorrect';
+                this.resultMessage.textContent = `✗ 错误！正确答案是 "${this.currentRadical.key.toUpperCase()}"`;
+                this.resultMessage.className = 'result-message incorrect';
+                
+                // 更新记忆状态（视为需要重新学习）
+                const currentState = this.memoryStates[this.currentRadical.radical];
+                const quality = this.sm2.getQualityForDifficulty('again');
+                const newState = this.sm2.calculateNextReview(quality, currentState);
+                
+                // 增加错误次数
+                newState.errorCount = (currentState.errorCount || 0) + 1;
+                newState.lastErrorTime = Date.now();
+                
+                this.memoryStates[this.currentRadical.radical] = newState;
+                
+                // 将这个字根添加到最近错误列表中，让它更快再次出现
+                this.recentErrors.push(this.currentRadical);
+                
+                // 如果错误次数很多，可以添加多次
+                if (newState.errorCount > 2) {
+                    // 错误超过2次，额外添加一次
+                    this.recentErrors.push(this.currentRadical);
+                }
+                
+                console.log(`字根 "${this.currentRadical.radical}" 错误次数: ${newState.errorCount}`);
+                console.log('最近错误列表:', this.recentErrors.map(r => r.radical));
+                
+                // 延迟后显示下一个字根（可能是同一个错误字根或其他字根）
+                setTimeout(() => {
+                    this.nextRadical();
+                }, 1500);
+            }
+            
+            // 更新进度条
+            updateProgress() {
+                const total = this.radicals.length;
+                const progress = (this.currentIndex / total) * 100;
+                this.progressBar.style.width = `${progress}%`;
+                
+                this.currentCount.textContent = this.currentIndex;
+                this.totalCount.textContent = total;
+            }
+            
+            // 更新统计信息
+            updateStats() {
+                const correctRate = this.stats.totalAttempts > 0 
+                    ? Math.round((this.stats.correctAttempts / this.stats.totalAttempts) * 100)
+                    : 0;
+                
+                this.correctRate.textContent = `${correctRate}%`;
+            }
+        }
+        
+        // 页面加载完成后初始化训练器
+        document.addEventListener('DOMContentLoaded', () => {
+            new RadicalTrainer();
+        });
+    </script>
+</body>
+</html>
