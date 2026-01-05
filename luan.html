@@ -73,7 +73,7 @@
             color: #333;
             margin-bottom: 30px;
             height: 160px;
-            display: flex;
+            display-flex: flex;
             align-items: center;
             justify-content: center;
         }
@@ -177,6 +177,26 @@
             margin-top: 3px;
         }
         
+        .level-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background-color: #f0f7ff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .level-badge {
+            background-color: #4a6ee0;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
         .footer {
             text-align: center;
             padding: 20px;
@@ -201,17 +221,22 @@
     <div class="container">
         <div class="header">
             <h1>乱17记忆训练器</h1>
-            <p class="subtitle">按错键自动重复 • 错误的出现更频繁</p>
+            <p class="subtitle">随机训练 • 错误必须纠正</p>
             <div class="progress-bar">
                 <div class="progress" id="progress"></div>
             </div>
         </div>
         
         <div class="main-area">
+            <div class="level-info">
+                当前目标: 每字根连续正确
+                <span class="level-badge" id="target-count">3</span> 次
+            </div>
+            
             <div class="radical-display" id="radical-display">?</div>
             
             <div class="input-container">
-                <div class="input-label" id="input-label">输入对应的按键：</div>
+                <!-- <div class="input-label" id="input-label">输入对应的按键：</div> -->
                 <input 
                     type="text" 
                     class="key-input" 
@@ -237,12 +262,12 @@
         
         <div class="stats-bar">
             <div class="stat-item">
-                <div class="stat-value" id="current-count">1</div>
-                <div class="stat-label">当前</div>
+                <div class="stat-value" id="remaining-count">56</div>
+                <div class="stat-label">待完成</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value" id="total-count">16</div>
-                <div class="stat-label">总计</div>
+                <div class="stat-value" id="current-level">1</div>
+                <div class="stat-label">阶段</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="correct-rate">0%</div>
@@ -251,7 +276,7 @@
         </div>
         
         <div class="footer">
-            <p>基于SM-2记忆算法 • 错误按键出现更频繁</p>
+            <p>随机训练算法 • 错误必须纠正</p>
         </div>
     </div>
 
@@ -317,69 +342,13 @@
             { radical: 'ch', key: 'c' },
         ];
         
-        // SM-2算法实现
-        class SM2 {
-            calculateNextReview(quality, previous) {
-                quality = Math.max(0, Math.min(5, quality));
-                
-                const defaultPrevious = {
-                    repetitions: 0,
-                    easeFactor: 2.5,
-                    interval: 0,
-                    nextReview: Date.now()
-                };
-                
-                const card = { ...defaultPrevious, ...previous };
-                
-                if (quality >= 3) {
-                    card.repetitions += 1;
-                } else {
-                    card.repetitions = 0;
-                }
-                
-                card.easeFactor = card.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-                card.easeFactor = Math.max(1.3, card.easeFactor);
-                
-                if (quality < 3) {
-                    card.interval = 1; // 重新学习，间隔设为1天
-                } else {
-                    if (card.repetitions === 1) {
-                        card.interval = 1;
-                    } else if (card.repetitions === 2) {
-                        card.interval = 6;
-                    } else {
-                        card.interval = Math.round(card.interval * card.easeFactor);
-                    }
-                }
-                
-                // 对于错误答案，我们设置更短的复习间隔（几秒钟到几分钟后再次出现）
-                if (quality < 3) {
-                    // 错误答案：在几秒到几分钟后再次出现
-                    card.nextReview = Date.now() + (30 * 1000); // 5秒后再次出现
-                } else {
-                    // 正确答案：按天计算
-                    card.nextReview = Date.now() + card.interval * 24 * 60 * 60 * 1000;
-                }
-                
-                return card;
-            }
-            
-            getQualityForDifficulty(difficulty) {
-                const qualityMap = {
-                    'again': 0,
-                    'hard': 3,
-                    'easy': 5
-                };
-                return qualityMap[difficulty] || 4;
-            }
-        }
+        // 目标序列: 3 → 5 → 8 → 12 → 17 → 23 → 30 → ...
+        const TARGET_SEQUENCE = [3, 5, 8, 12, 17, 23, 30];
         
         // 训练器主类
-        class RadicalTrainer {
+        class RandomRadicalTrainer {
             constructor() {
-                this.sm2 = new SM2();
                 this.radicals = radicals;
-                this.currentIndex = 0;
                 this.currentRadical = null;
                 this.stats = {
                     totalAttempts: 0,
@@ -388,10 +357,16 @@
                     bestStreak: 0
                 };
                 
-                this.memoryStates = this.loadMemoryStates();
-                this.recentErrors = []; // 记录最近错误的字根，让它们更快出现
+                // 加载所有状态
+                this.loadAllStates();
+                
+                // 初始化训练参数
+                this.currentLevel = this.savedState.currentLevel || 0;
+                this.targetCount = TARGET_SEQUENCE[this.currentLevel] || TARGET_SEQUENCE[0];
+                
                 this.initElements();
                 this.bindEvents();
+                this.updateRemainingCards();
                 this.nextRadical();
             }
             
@@ -402,9 +377,10 @@
                 this.resultMessage = document.getElementById('result-message');
                 this.inputLabel = document.getElementById('input-label');
                 this.progressBar = document.getElementById('progress');
-                this.currentCount = document.getElementById('current-count');
-                this.totalCount = document.getElementById('total-count');
+                this.remainingCount = document.getElementById('remaining-count');
+                this.currentLevelEl = document.getElementById('current-level');
                 this.correctRate = document.getElementById('correct-rate');
+                this.targetCountEl = document.getElementById('target-count');
             }
             
             // 绑定事件
@@ -422,87 +398,176 @@
                 });
             }
             
-            // 处理输入
-            handleInput(e) {
-                const value = e.target.value.toLowerCase();
+            // 加载所有状态
+            loadAllStates() {
+                // 加载卡片状态
+                const cardStatesKey = 'randomRadicalCardStates';
+                const savedCardStates = localStorage.getItem(cardStatesKey);
+                this.cardStates = {};
                 
-                // 如果输入不为空，立即检查答案
-                if (value.length > 0) {
-                    this.checkAnswer();
-                }
-            }
-            
-            // 加载记忆状态
-            loadMemoryStates() {
-                const storageKey = 'radicalMemoryStates';
-                const savedStates = localStorage.getItem(storageKey);
-                let states = {};
-                
-                if (savedStates) {
-                    states = JSON.parse(savedStates);
+                if (savedCardStates) {
+                    this.cardStates = JSON.parse(savedCardStates);
                 }
                 
-                // 确保所有字根都有状态
+                // 确保所有字根都有初始状态
                 this.radicals.forEach(radical => {
-                    if (!states[radical.radical]) {
-                        states[radical.radical] = {
-                            repetitions: 0,
-                            easeFactor: 2.5,
-                            interval: 0,
-                            nextReview: Date.now(),
-                            errorCount: 0, // 添加错误次数统计
-                            lastErrorTime: 0 // 上次错误时间
+                    const key = radical.radical;
+                    if (!this.cardStates[key]) {
+                        this.cardStates[key] = {
+                            successCount: 0,  // 当前阶段成功次数
+                            totalSuccess: 0,  // 累计总成功次数
+                            level: 0          // 当前达到的阶段
                         };
                     }
                 });
                 
-                return states;
+                // 加载程序状态
+                const appStateKey = 'randomRadicalAppState';
+                const savedAppState = localStorage.getItem(appStateKey);
+                this.savedState = savedAppState ? JSON.parse(savedAppState) : {
+                    currentLevel: 0,
+                    stats: {
+                        totalAttempts: 0,
+                        correctAttempts: 0,
+                        bestStreak: 0
+                    }
+                };
+                
+                // 恢复统计
+                this.stats = {
+                    ...this.stats,
+                    ...this.savedState.stats
+                };
             }
             
-            // 保存记忆状态
-            saveMemoryStates() {
-                localStorage.setItem('radicalMemoryStates', JSON.stringify(this.memoryStates));
+            // 保存所有状态
+            saveAllStates() {
+                // 保存卡片状态
+                localStorage.setItem('randomRadicalCardStates', JSON.stringify(this.cardStates));
+                
+                // 保存程序状态
+                const appState = {
+                    currentLevel: this.currentLevel,
+                    stats: {
+                        totalAttempts: this.stats.totalAttempts,
+                        correctAttempts: this.stats.correctAttempts,
+                        bestStreak: this.stats.bestStreak
+                    }
+                };
+                localStorage.setItem('randomRadicalAppState', JSON.stringify(appState));
             }
             
-            // 获取下一个需要复习的字根
-            getNextRadical() {
-                // 首先检查是否有最近错误的字根需要优先复习
-                if (this.recentErrors.length > 0) {
-                    // 获取最近错误的字根
-                    const recentErrorRadical = this.recentErrors.shift();
-                    console.log('优先复习错误字根:', recentErrorRadical.radical);
-                    return recentErrorRadical;
+            // 重置所有状态（可选功能，用于重新开始）
+            resetAllStates() {
+                // 重置卡片状态
+                this.radicals.forEach(radical => {
+                    this.cardStates[radical.radical] = {
+                        successCount: 0,
+                        totalSuccess: 0,
+                        level: 0
+                    };
+                });
+                
+                // 重置程序状态
+                this.currentLevel = 0;
+                this.targetCount = TARGET_SEQUENCE[0];
+                this.stats = {
+                    totalAttempts: 0,
+                    correctAttempts: 0,
+                    currentStreak: 0,
+                    bestStreak: 0
+                };
+                
+                this.saveAllStates();
+                this.updateRemainingCards();
+                this.updateDisplay();
+            }
+            
+            // 更新待完成的卡片列表
+            updateRemainingCards() {
+                // 找出所有在当前阶段还未达到目标的卡片
+                this.remainingCards = this.radicals.filter(radical => {
+                    const state = this.cardStates[radical.radical];
+                    return state.level < this.currentLevel || 
+                          (state.level === this.currentLevel && state.successCount < this.targetCount);
+                });
+                
+                // 如果当前阶段所有卡片都完成了，进入下一阶段
+                if (this.remainingCards.length === 0 && this.currentLevel < TARGET_SEQUENCE.length - 1) {
+                    this.currentLevel++;
+                    this.targetCount = TARGET_SEQUENCE[this.currentLevel];
+                    
+                    // 重置所有卡片的当前阶段成功次数
+                    this.radicals.forEach(radical => {
+                        this.cardStates[radical.radical].level = this.currentLevel;
+                        this.cardStates[radical.radical].successCount = 0;
+                    });
+                    
+                    // 重新计算剩余卡片
+                    this.updateRemainingCards();
+                    
+                    // 显示升级消息
+                    this.showLevelUpMessage();
+                    
+                    // 保存状态
+                    this.saveAllStates();
+                }
+            }
+            
+            // 显示升级消息
+            showLevelUpMessage() {
+                this.resultMessage.textContent = `🎉 恭喜！进入第 ${this.currentLevel + 1} 阶段，新目标: ${this.targetCount} 次`;
+                this.resultMessage.className = 'result-message correct';
+                
+                // 更新显示
+                this.updateDisplay();
+                
+                // 清空输入框
+                this.keyInput.value = '';
+                this.keyInput.className = 'key-input';
+                
+                // 2秒后显示下一个字根
+                setTimeout(() => {
+                    this.nextRadical();
+                }, 2000);
+            }
+            
+            // 随机获取下一个字根（从剩余卡片中随机选择）
+            nextRadical() {
+                if (this.remainingCards.length === 0) {
+                    // 所有阶段都完成了，显示完成消息
+                    this.radicalDisplay.textContent = '🎯';
+                    this.inputLabel.textContent = '恭喜！所有训练已完成！';
+                    this.keyInput.disabled = true;
+                    this.resultMessage.textContent = '您已掌握所有字根！';
+                    return;
                 }
                 
-                // 按下次复习时间排序，但优先显示有错误的字根
-                const now = Date.now();
-                const sortedRadicals = this.radicals
-                    .map(radical => {
-                        const state = this.memoryStates[radical.radical];
-                        // 计算优先级：错误次数越多，优先级越高
-                        const errorPriority = state.errorCount || 0;
-                        // 距离下次复习的时间（如果已经过了复习时间，则为负数）
-                        const timeUntilReview = state.nextReview - now;
-                        
-                        return {
-                            ...radical,
-                            state: state,
-                            priority: errorPriority * 1000 - timeUntilReview // 错误次数影响更大
-                        };
-                    })
-                    .sort((a, b) => b.priority - a.priority); // 优先级高的排在前面
-                
-                return sortedRadicals[0] || this.radicals[0];
-            }
-            
-            // 显示下一个字根
-            nextRadical() {
-                this.currentRadical = this.getNextRadical();
-                this.currentIndex = this.radicals.findIndex(r => r.radical === this.currentRadical.radical) + 1;
+                // 从剩余卡片中随机选择一个
+                const randomIndex = Math.floor(Math.random() * this.remainingCards.length);
+                this.currentRadical = this.remainingCards[randomIndex];
                 
                 // 更新显示
                 this.radicalDisplay.textContent = this.currentRadical.radical;
-                this.inputLabel.textContent = `输入 "${this.currentRadical.radical}" 对应的按键：`;
+                const keyMap = new Map();
+                keyMap['h'] = '1-1'
+                keyMap['s'] = '1-2'
+                keyMap['z'] = '1-3'
+                keyMap['b'] = '1-4'
+                keyMap['x'] = '1-5'
+                keyMap['m'] = '1-6'
+                keyMap['l'] = '2-1'
+                keyMap['d'] = '2-2'
+                keyMap['y'] = '2-3'
+                keyMap['w'] = '2-4'
+                keyMap['j'] = '2-5'
+                keyMap['n'] = '2-6'
+                keyMap['c'] = '3-1'
+                keyMap['q'] = '3-2'
+                keyMap['g'] = '3-3'
+                keyMap['f'] = '3-4'
+                keyMap['t'] = '3-5'
+                // this.inputLabel.textContent = `输入 "${this.currentRadical.radical}" 对应的按键 (${keyMap[this.currentRadical.key]})：`;
                 
                 // 重置输入框
                 this.keyInput.value = '';
@@ -513,9 +578,21 @@
                 this.resultMessage.textContent = '';
                 this.resultMessage.className = 'result-message';
                 
-                // 更新进度
-                this.updateProgress();
-                this.updateStats();
+                // 更新进度和统计
+                this.updateDisplay();
+                
+                // 输出当前卡片进度到控制台
+                this.logProgress();
+            }
+            
+            // 处理输入
+            handleInput(e) {
+                const value = e.target.value.toLowerCase();
+                
+                // 如果输入不为空，立即检查答案
+                if (value.length > 0) {
+                    this.checkAnswer();
+                }
             }
             
             // 检查答案
@@ -536,8 +613,13 @@
                 }
                 
                 // 保存状态
-                this.saveMemoryStates();
-                this.updateStats();
+                this.saveAllStates();
+                
+                // 输出进度到控制台
+                this.logProgress();
+                
+                // 更新显示
+                this.updateDisplay();
             }
             
             // 处理正确答案
@@ -547,30 +629,38 @@
                 this.stats.currentStreak++;
                 this.stats.bestStreak = Math.max(this.stats.bestStreak, this.stats.currentStreak);
                 
+                // 更新当前卡片状态
+                const cardState = this.cardStates[this.currentRadical.radical];
+                cardState.successCount++;
+                cardState.totalSuccess++;
+                
+                // 检查是否达到当前阶段目标
+                if (cardState.successCount >= this.targetCount) {
+                    cardState.level = this.currentLevel;
+                }
+                
                 // 显示正确反馈
                 this.keyInput.className = 'key-input correct';
-                this.resultMessage.textContent = '✓ 正确！自动继续...';
+                this.resultMessage.textContent = '✓ 正确！';
                 this.resultMessage.className = 'result-message correct';
                 
-                // 更新记忆状态（视为简单记住）
-                const currentState = this.memoryStates[this.currentRadical.radical];
-                const quality = this.sm2.getQualityForDifficulty('easy');
-                const newState = this.sm2.calculateNextReview(quality, currentState);
-                
-                // 重置错误次数（因为回答正确了）
-                newState.errorCount = 0;
-                this.memoryStates[this.currentRadical.radical] = newState;
+                // 更新剩余卡片列表
+                this.updateRemainingCards();
                 
                 // 延迟后显示下一个字根
                 setTimeout(() => {
                     this.nextRadical();
-                }, 80);
+                }, 800);
             }
             
             // 处理错误答案
             handleIncorrectAnswer() {
                 // 更新统计
                 this.stats.currentStreak = 0;
+                
+                // 重置当前卡片成功次数
+                const cardState = this.cardStates[this.currentRadical.radical];
+                cardState.successCount = 0; // 错误时清零
                 
                 // 显示错误反馈
                 this.keyInput.className = 'key-input incorrect';
@@ -592,50 +682,71 @@
                 keyMap['g'] = '3-3'
                 keyMap['f'] = '3-4'
                 keyMap['t'] = '3-5'
-                this.resultMessage.textContent = `✗ 错误！正确答案是 "${keyMap[this.currentRadical.key]}"`;
+                this.resultMessage.textContent = `✗ 错误！正确答案是 "${keyMap[this.currentRadical.key]}"，请重新输入`;
                 this.resultMessage.className = 'result-message incorrect';
                 
-                // 更新记忆状态（视为需要重新学习）
-                const currentState = this.memoryStates[this.currentRadical.radical];
-                const quality = this.sm2.getQualityForDifficulty('again');
-                const newState = this.sm2.calculateNextReview(quality, currentState);
+                // 错误后不清除当前卡片，等待用户输入正确
+                // 不清除输入框，让用户可以修改
                 
-                // 增加错误次数
-                newState.errorCount = (currentState.errorCount || 0) + 1;
-                newState.lastErrorTime = Date.now();
-                
-                this.memoryStates[this.currentRadical.radical] = newState;
-                
-                // 将这个字根添加到最近错误列表中，让它更快再次出现
-                this.recentErrors.push(this.currentRadical);
-                
-                // 如果错误次数很多，可以添加多次
-                if (newState.errorCount > 2) {
-                    // 错误超过2次，额外添加一次
-                    this.recentErrors.push(this.currentRadical);
-                }
-                
-                console.log(`字根 "${this.currentRadical.radical}" 错误次数: ${newState.errorCount}`);
-                console.log('最近错误列表:', this.recentErrors.map(r => r.radical));
-                
-                // 延迟后显示下一个字根（可能是同一个错误字根或其他字根）
+                // 重新聚焦输入框，让用户可以继续输入
                 setTimeout(() => {
-                    this.nextRadical();
-                }, 1500);
+                    this.keyInput.focus();
+                    this.keyInput.select();
+                }, 50);
+                
+                // 注意：这里不调用 nextRadical()，保持当前卡片直到用户答对
+                // 更新剩余卡片列表（错误后卡片仍然在剩余列表中）
+                this.updateRemainingCards();
             }
             
-            // 更新进度条
-            updateProgress() {
-                const total = this.radicals.length;
-                const progress = (this.currentIndex / total) * 100;
+            // 在控制台输出所有卡片进度
+            logProgress() {
+                console.clear();
+                console.log('='.repeat(60));
+                console.log(`当前阶段: ${this.currentLevel + 1}, 目标次数: ${this.targetCount}`);
+                console.log(`剩余卡片数: ${this.remainingCards.length}/${this.radicals.length}`);
+                console.log('='.repeat(60));
+                
+                // 按字根排序输出
+                const sortedRadicals = [...this.radicals].sort((a, b) => a.radical.localeCompare(b.radical));
+                
+                sortedRadicals.forEach(radical => {
+                    const state = this.cardStates[radical.radical];
+                    const progressBar = this.createProgressBar(state.successCount, this.targetCount);
+                    const levelInfo = state.level > this.currentLevel ? 
+                        `(已过关 L${state.level + 1})` : 
+                        `(当前 L${this.currentLevel + 1}: ${state.successCount}/${this.targetCount})`;
+                    
+                    console.log(`${radical.radical.padEnd(5)} -> ${radical.key.padEnd(2)} ${progressBar} ${levelInfo}`);
+                });
+                
+                console.log('='.repeat(60));
+                console.log(`统计: 总尝试 ${this.stats.totalAttempts}, 正确 ${this.stats.correctAttempts}, 正确率 ${Math.round((this.stats.correctAttempts / this.stats.totalAttempts) * 100) || 0}%`);
+                console.log(`连胜: 当前 ${this.stats.currentStreak}, 最佳 ${this.stats.bestStreak}`);
+                console.log('='.repeat(60));
+            }
+            
+            // 创建进度条（用于控制台显示）
+            createProgressBar(current, max) {
+                const width = 10;
+                const filled = Math.round((current / max) * width);
+                const empty = width - filled;
+                return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']';
+            }
+            
+            // 更新显示
+            updateDisplay() {
+                // 更新进度（基于剩余卡片数量）
+                const totalCards = this.radicals.length;
+                const completedCards = totalCards - this.remainingCards.length;
+                const progress = (completedCards / totalCards) * 100;
                 this.progressBar.style.width = `${progress}%`;
                 
-                this.currentCount.textContent = this.currentIndex;
-                this.totalCount.textContent = total;
-            }
-            
-            // 更新统计信息
-            updateStats() {
+                // 更新统计信息
+                this.remainingCount.textContent = this.remainingCards.length;
+                this.currentLevelEl.textContent = this.currentLevel + 1;
+                this.targetCountEl.textContent = this.targetCount;
+                
                 const correctRate = this.stats.totalAttempts > 0 
                     ? Math.round((this.stats.correctAttempts / this.stats.totalAttempts) * 100)
                     : 0;
@@ -646,9 +757,62 @@
         
         // 页面加载完成后初始化训练器
         document.addEventListener('DOMContentLoaded', () => {
-            new RadicalTrainer();
+            window.trainer = new RandomRadicalTrainer();
+            
+            // 添加重置按钮（可选，用于调试）
+            const resetButton = document.createElement('button');
+            resetButton.textContent = '重置训练';
+            resetButton.style.position = 'fixed';
+            resetButton.style.bottom = '10px';
+            resetButton.style.right = '10px';
+            resetButton.style.padding = '5px 10px';
+            resetButton.style.backgroundColor = '#ef4444';
+            resetButton.style.color = 'white';
+            resetButton.style.border = 'none';
+            resetButton.style.borderRadius = '5px';
+            resetButton.style.cursor = 'pointer';
+            resetButton.style.zIndex = '1000';
+            resetButton.onclick = () => {
+                if (confirm('确定要重置所有训练进度吗？这将清除所有保存的数据。')) {
+                    window.trainer.resetAllStates();
+                    window.location.reload();
+                }
+            };
+            document.body.appendChild(resetButton);
+            
+            // 添加导出数据按钮
+            const exportButton = document.createElement('button');
+            exportButton.textContent = '导出数据';
+            exportButton.style.position = 'fixed';
+            exportButton.style.bottom = '10px';
+            exportButton.style.right = '100px';
+            exportButton.style.padding = '5px 10px';
+            exportButton.style.backgroundColor = '#4a6ee0';
+            exportButton.style.color = 'white';
+            exportButton.style.border = 'none';
+            exportButton.style.borderRadius = '5px';
+            exportButton.style.cursor = 'pointer';
+            exportButton.style.zIndex = '1000';
+            exportButton.onclick = () => {
+                const data = {
+                    cardStates: window.trainer.cardStates,
+                    appState: {
+                        currentLevel: window.trainer.currentLevel,
+                        stats: window.trainer.stats
+                    }
+                };
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '乱17训练数据.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                alert('数据已导出为JSON文件');
+            };
+            document.body.appendChild(exportButton);
         });
     </script>
 </body>
-
 </html>
