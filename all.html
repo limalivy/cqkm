@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动循环打字练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .exercise-area {
+            margin-bottom: 30px;
+        }
+        
+        .words-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: left;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            min-height: 120px;
+        }
+        
+        .word-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .word-text {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .word-input {
+            font-size: 1.3rem;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 60px;
+            width: auto;
+            background-color: white;
+        }
+        
+        .word-input.pending {
+            border-color: #ddd;
+            background-color: white;
+        }
+        
+        .word-input.current {
+            border-color: #3498db;
+            background-color: #f0f8ff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .word-input.correct {
+            border-color: #3ce76a;
+            color: #0c0c0c;
+        }
+        
+        .word-input.incorrect {
+            border-color: #e74c3c;
+            background-color: #ffeaea;
+            color: #b0b0b0;
+        }
+        
+        .word-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        #reset-btn {
+            background-color: #ecf0f1;
+            color: #333;
+        }
+        
+        #reset-btn:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .words-container {
+                gap: 10px;
+            }
+            
+            .word-input {
+                font-size: 1.1rem;
+                padding: 8px;
+                min-width: 50px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>自动循环打字练习</h1>
+            <p class="subtitle">每个字词对应一个输入框，自动循环练习，输入正确后自动跳转</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="completed">0/10</div>
+                <div class="stat-label">完成字词</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="group-count">1</div>
+                <div class="stat-label">练习组数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="error-count">0</div>
+                <div class="stat-label">错误次数</div>
+            </div>
+        </div>
+        
+        <div class="exercise-area">
+            <div class="words-container" id="words-container">
+                <!-- 动态生成的字词和输入框将显示在这里 -->
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button id="reset-btn">重置进度</button>
+        </div>
+        
+        <div class="footer">
+            <p>打字练习工具 | 自动循环练习 | 输入正确后自动跳转到下一个</p>
+        </div>
+    </div>
+
+    <script>
+        // 字词库 - 可以扩展
+        const wordBank = [
+            "的", "一", "是", "在", "了", "不", "和", "有", "大", "这", 
+            "主", "中", "人", "上", "为", "们", "个", "用", "时", "要", 
+            "移动", "互联网", "人工智能", "大数据", "云计算", "区块链", 
+            "机器学习", "深度学习", "自然语言", "计算机", "算法", 
+            "编程", "开发", "设计", "产品", "用户", "体验", "界面"
+        ];
+        
+        // 状态变量
+        let currentExercise = [];
+        let currentIndex = 0;
+        let isActive = false;
+        let completedCount = 0;
+        let groupCount = 1;
+        let errorCount = 0;
+        let isComposition = false;
+        let hasErrorInCurrentInput = false; // 当前输入是否已经错误
+        
+        // DOM元素
+        const wordsContainerEl = document.getElementById('words-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const completedEl = document.getElementById('completed');
+        const groupCountEl = document.getElementById('group-count');
+        const errorCountEl = document.getElementById('error-count');
+        
+        // 初始化
+        function init() {
+            startNewExercise();
+            
+            // 事件监听
+            resetBtn.addEventListener('click', resetCurrentGroup);
+        }
+        
+        // 开始新的练习组
+        function startNewExercise() {
+            generateNewExercise();
+            renderWords();
+            startExercise();
+        }
+        
+        // 生成新的练习字词
+        function generateNewExercise() {
+            currentExercise = [];
+            for (let i = 0; i < 10; i++) {
+                const randomIndex = Math.floor(Math.random() * wordBank.length);
+                currentExercise.push(wordBank[randomIndex]);
+            }
+        }
+        
+        // 渲染字词和输入框
+        function renderWords() {
+            wordsContainerEl.innerHTML = '';
+            
+            currentExercise.forEach((word, index) => {
+                // 创建字词容器
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.id = `word-item-${index}`;
+                
+                // 创建字词文本
+                const wordText = document.createElement('div');
+                wordText.className = 'word-text';
+                wordText.textContent = word;
+                wordItem.appendChild(wordText);
+                
+                // 创建输入框
+                const wordInput = document.createElement('input');
+                wordInput.type = 'text';
+                wordInput.className = 'word-input pending';
+                wordInput.id = `word-input-${index}`;
+                wordInput.dataset.index = index;
+                wordInput.dataset.word = word;
+                
+                // 设置输入框宽度（根据字词长度）
+                const wordLength = word.length;
+                const minWidth = 60;
+                const width = Math.max(minWidth, wordLength * 30);
+                wordInput.style.width = `${width}px`;
+                
+                // 添加事件监听
+                wordInput.addEventListener('input', handleInput);
+                wordInput.addEventListener('keydown', handleKeyDown);
+                wordInput.addEventListener('compositionstart', () => {
+                    isComposition = true;
+                });
+                wordInput.addEventListener('compositionend', () => {
+                    isComposition = false;
+                });
+                
+                // 焦点事件监听
+                wordInput.addEventListener('focus', () => {
+                    // 禁止手动选择输入框，只能顺序输入
+                    if (index !== currentIndex) {
+                        wordInput.blur();
+                        const currentInput = document.getElementById(`word-input-${currentIndex}`);
+                        if (currentInput) currentInput.focus();
+                    }
+                });
+                
+                // 失去焦点时检查
+                wordInput.addEventListener('blur', () => {
+                    if (index === currentIndex && isActive) {
+                        setTimeout(() => {
+                            const currentInput = document.getElementById(`word-input-${currentIndex}`);
+                            if (currentInput && document.activeElement !== currentInput) {
+                                currentInput.focus();
+                            }
+                        }, 10);
+                    }
+                });
+                
+                wordItem.appendChild(wordInput);
+                wordsContainerEl.appendChild(wordItem);
+            });
+        }
+        
+        // 开始练习
+        function startExercise() {
+            isActive = true;
+            currentIndex = 0;
+            completedCount = 0;
+            hasErrorInCurrentInput = false;
+            
+            // 启用第一个输入框
+            const firstInput = document.getElementById('word-input-0');
+            if (firstInput) {
+                firstInput.disabled = false;
+                firstInput.className = 'word-input current';
+                firstInput.focus();
+                firstInput.value = '';
+            }
+            
+            // 禁用所有其他输入框
+            for (let i = 1; i < currentExercise.length; i++) {
+                const inputEl = document.getElementById(`word-input-${i}`);
+                if (inputEl) {
+                    inputEl.disabled = true;
+                    inputEl.className = 'word-input pending';
+                    inputEl.value = '';
+                }
+            }
+            
+            updateStats();
+        }
+        
+        // 处理输入事件
+        function handleInput(e) {
+            if (!isActive) return;
+            
+            const inputEl = e.target;
+            const index = parseInt(inputEl.dataset.index);
+            const value = inputEl.value;
+            
+            if (index !== currentIndex) return;
+            
+            // 如果当前输入已经错误，保持红色样式
+            if (hasErrorInCurrentInput) {
+                inputEl.className = 'word-input incorrect';
+            }
+            
+            // 如果不是输入法组合状态，立即检查
+            if (!isComposition) {
+                setTimeout(() => checkWord(index, value), 10);
+            }
+        }
+        
+        // 处理按键事件
+        function handleKeyDown(e) {
+            if (!isActive) return;
+            console.info("key " + e.key)
+            const inputEl = e.target;
+            const index = parseInt(inputEl.dataset.index);
+            
+            if (index !== currentIndex) return;
+            
+            // 删除键按下 - 立即判定为错误
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                hasErrorInCurrentInput = true;
+                inputEl.className = 'word-input incorrect';
+                errorCount++;
+                updateStats();
+                //e.preventDefault();
+                return;
+            }
+            
+            // 空格键按下 - 提交当前字词
+            if (e.key === ' ') {
+                //e.preventDefault();
+                setTimeout(() => {
+                    checkWord(index, inputEl.value, true);
+                })
+            }
+        }
+        
+        // 检查字词
+        function checkWord(index, value, forceCheck = false) {
+            if (!isActive || index !== currentIndex) return;
+            
+            const inputEl = document.getElementById(`word-input-${index}`);
+            const word = currentExercise[index];
+            console.info("word " + word + " value " + value + " hasErrorInCurrentInput " + hasErrorInCurrentInput)
+            
+            // 如果已经错误，保持红色
+            if (hasErrorInCurrentInput) {
+                inputEl.className = 'word-input incorrect';
+                
+                // 检查是否现在输入正确了
+                if (value === word || (forceCheck && value.trim() === word)) {
+                    // 输入正确，划掉字并跳转
+                    inputEl.className = 'word-input incorrect';
+                    inputEl.disabled = true;
+                    inputEl.value = word;
+                    
+                    completedCount++;
+                    moveToNextInput();
+                }
+                console.info("error 1")
+                return;
+            }
+            
+            // 正常检查
+            if (value === word || (forceCheck && value.trim() === word)) {
+                // 输入正确
+                inputEl.className = 'word-input correct';
+                inputEl.disabled = true;
+                inputEl.value = word;
+                
+                completedCount++;
+                moveToNextInput();
+                console.info("ok")
+            } else if (value.length > 0) {
+                // 输入有内容但不正确
+                hasErrorInCurrentInput = true;
+                errorCount++;
+                inputEl.className = 'word-input incorrect';
+                updateStats();
+                console.info("error 2")
+            }
+        }
+        
+        // 移动到下一个输入框
+        function moveToNextInput() {
+            hasErrorInCurrentInput = false;
+            
+            // 禁用当前输入框
+            const currentInput = document.getElementById(`word-input-${currentIndex}`);
+            if (currentInput) {
+                currentInput.disabled = true;
+            }
+            
+            // 更新索引
+            currentIndex++;
+            
+            // 如果还有下一个输入框
+            if (currentIndex < currentExercise.length) {
+                const nextInput = document.getElementById(`word-input-${currentIndex}`);
+                if (nextInput) {
+                    nextInput.disabled = false;
+                    nextInput.className = 'word-input current';
+                    nextInput.focus();
+                    nextInput.value = '';
+                    updateStats();
+                }
+            } else {
+                // 所有字词都已完成
+                completeCurrentGroup();
+            }
+        }
+        
+        // 重置当前组
+        function resetCurrentGroup() {
+            // 重置所有输入框
+            for (let i = 0; i < currentExercise.length; i++) {
+                const inputEl = document.getElementById(`word-input-${i}`);
+                if (inputEl) {
+                    inputEl.value = '';
+                    inputEl.className = i === 0 ? 'word-input current' : 'word-input pending';
+                    inputEl.disabled = i !== 0;
+                }
+            }
+            
+            // 重置状态
+            currentIndex = 0;
+            completedCount = 0;
+            hasErrorInCurrentInput = false;
+            
+            // 聚焦到第一个输入框
+            const firstInput = document.getElementById('word-input-0');
+            if (firstInput) {
+                firstInput.focus();
+            }
+            
+            updateStats();
+        }
+        
+        // 完成当前组
+        function completeCurrentGroup() {
+            isActive = false;
+            
+            // 短暂延迟后自动开始下一组
+            getNext();
+        }
+        
+        // =============== 对外接口 ===============
+        
+        // 获取下一组练习
+        function getNext() {
+            groupCount++;
+            startNewExercise();
+            updateStats();
+        }
+        
+        // 获取当前统计数据
+        function getStats() {
+            return {
+                completed: completedCount,
+                total: currentExercise.length,
+                groupCount: groupCount,
+                errorCount: errorCount
+            };
+        }
+        
+        // 设置字词库
+        function setWordBank(newWordBank) {
+            wordBank.length = 0;
+            wordBank.push(...newWordBank);
+        }
+        
+        // =============== 辅助函数 ===============
+        
+        // 更新统计数据
+        function updateStats() {
+            completedEl.textContent = `${completedCount}/${currentExercise.length}`;
+            groupCountEl.textContent = groupCount;
+            errorCountEl.textContent = errorCount;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
