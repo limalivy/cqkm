@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
         }
-        
+
         body {
             background-color: #f5f7fa;
             color: #333;
@@ -23,7 +24,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .container {
             max-width: 1000px;
             width: 100%;
@@ -32,24 +33,191 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             padding: 40px;
             margin: 20px;
+            position: relative;
         }
-        
+
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .settings-btn:hover {
+            background-color: #2980b9;
+            /* transform: rotate(30deg); */
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #e74c3c;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .form-hint {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #ecf0f1;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d5dbdb;
+        }
+
         header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         h1 {
             color: #2c3e50;
             margin-bottom: 10px;
             font-size: 2.5rem;
         }
-        
+
         .subtitle {
             color: #7f8c8d;
             font-size: 1.1rem;
         }
-        
+
         .stats {
             display: flex;
             justify-content: space-between;
@@ -58,28 +226,28 @@
             padding: 15px 20px;
             margin-bottom: 30px;
         }
-        
+
         .stat-item {
             text-align: center;
             flex: 1;
         }
-        
+
         .stat-value {
             font-size: 1.8rem;
             font-weight: bold;
             color: #3498db;
         }
-        
+
         .stat-label {
             font-size: 0.9rem;
             color: #7f8c8d;
             margin-top: 5px;
         }
-        
+
         .exercise-area {
             margin-bottom: 30px;
         }
-        
+
         .words-container {
             display: flex;
             flex-wrap: wrap;
@@ -91,20 +259,20 @@
             border-radius: 8px;
             min-height: 120px;
         }
-        
+
         .word-item {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        
+
         .word-text {
             font-size: 1.2rem;
             margin-bottom: 8px;
             color: #2c3e50;
             font-weight: 500;
         }
-        
+
         .word-input {
             font-size: 1.3rem;
             padding: 10px;
@@ -117,41 +285,41 @@
             width: auto;
             background-color: white;
         }
-        
+
         .word-input.pending {
             border-color: #ddd;
             background-color: white;
         }
-        
+
         .word-input.current {
             border-color: #3498db;
             background-color: #f0f8ff;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
-        
+
         .word-input.correct {
             border-color: #3ce76a;
             color: #0c0c0c;
         }
-        
+
         .word-input.incorrect {
             border-color: #e74c3c;
             background-color: #ffeaea;
             color: #b0b0b0;
         }
-        
+
         .word-input:disabled {
             cursor: not-allowed;
             opacity: 0.8;
         }
-        
+
         .buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
             margin-top: 20px;
         }
-        
+
         button {
             padding: 14px 28px;
             font-size: 1.1rem;
@@ -161,60 +329,74 @@
             transition: all 0.3s ease;
             font-weight: 600;
         }
-        
+
         #reset-btn {
             background-color: #ecf0f1;
             color: #333;
         }
-        
+
         #reset-btn:hover {
             background-color: #d5dbdb;
         }
-        
+
         .footer {
             text-align: center;
             margin-top: 30px;
             color: #7f8c8d;
             font-size: 0.9rem;
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 25px;
             }
-            
+
             h1 {
                 font-size: 2rem;
             }
-            
+
             .stats {
                 flex-direction: column;
                 gap: 15px;
             }
-            
+
             .words-container {
                 gap: 10px;
             }
-            
+
             .word-input {
                 font-size: 1.1rem;
                 padding: 8px;
                 min-width: 50px;
             }
-            
+
             .buttons {
                 flex-direction: column;
+            }
+
+            .settings-btn {
+                top: 15px;
+                right: 15px;
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
+        <!-- 设置按钮 -->
+        <button class="settings-btn" id="settings-btn">
+            ⚙️
+        </button>
+
         <header>
             <h1>自动循环打字练习</h1>
             <p class="subtitle">每个字词对应一个输入框，自动循环练习，输入正确后自动跳转</p>
         </header>
-        
+
         <div class="stats">
             <div class="stat-item">
                 <div class="stat-value" id="completed">0/10</div>
@@ -229,32 +411,80 @@
                 <div class="stat-label">错误次数</div>
             </div>
         </div>
-        
+
         <div class="exercise-area">
             <div class="words-container" id="words-container">
                 <!-- 动态生成的字词和输入框将显示在这里 -->
             </div>
         </div>
-        
+
         <div class="buttons">
             <button id="reset-btn">重置进度</button>
         </div>
-        
+
         <div class="footer">
             <p>打字练习工具 | 自动循环练习 | 输入正确后自动跳转到下一个</p>
         </div>
     </div>
 
+    <!-- 设置弹窗 -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">打字练习设置</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exercise-title">练习标题</label>
+                    <input type="text" id="exercise-title" class="form-control" placeholder="请输入练习标题">
+                </div>
+                <div class="form-group">
+                    <label for="word-bank">字词库 (每行一个字或词)</label>
+                    <textarea id="word-bank" class="form-control" placeholder="请输入字词，每行一个"></textarea>
+                    <div class="form-hint">每行输入一个字或词，将用于随机生成练习内容</div>
+                </div>
+                <div class="form-group">
+                    <label for="words-per-group">每组字词数量</label>
+                    <input type="number" id="words-per-group" class="form-control" min="5" max="20" value="10">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancel-btn">取消</button>
+                <button class="btn-primary" id="save-btn">保存设置</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+
         // 字词库 - 可以扩展
-        const wordBank = [
-            "的", "一", "是", "在", "了", "不", "和", "有", "大", "这", 
-            "主", "中", "人", "上", "为", "们", "个", "用", "时", "要", 
-            "移动", "互联网", "人工智能", "大数据", "云计算", "区块链", 
-            "机器学习", "深度学习", "自然语言", "计算机", "算法", 
-            "编程", "开发", "设计", "产品", "用户", "体验", "界面"
-        ];
-        
+        const wordBank = [];
+        const insertList = [];
+
+        const baseTarget = 5;
+        // 一次错误惩罚多少分
+        const penalty = 5;
+
+        //错误需要惩罚多少次联系
+        const pealtyRepeat = 5
+
+        const scoreMap = new Map();
+
+        let currentTarget = 1 * baseTarget;
+
+        const errorSet = new Set();
+
+        let inError = false
+
+
+
+        // 练习配置
+        let exerciseConfig = {
+            title: "自动循环打字练习",
+            wordsPerGroup: 10
+        };
+
         // 状态变量
         let currentExercise = [];
         let currentIndex = 0;
@@ -264,54 +494,216 @@
         let errorCount = 0;
         let isComposition = false;
         let hasErrorInCurrentInput = false; // 当前输入是否已经错误
-        
+
         // DOM元素
         const wordsContainerEl = document.getElementById('words-container');
         const resetBtn = document.getElementById('reset-btn');
         const completedEl = document.getElementById('completed');
         const groupCountEl = document.getElementById('group-count');
         const errorCountEl = document.getElementById('error-count');
-        
+        const settingsBtn = document.getElementById('settings-btn');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const exerciseTitleInput = document.getElementById('exercise-title');
+        const wordBankInput = document.getElementById('word-bank');
+        const wordsPerGroupInput = document.getElementById('words-per-group');
+        const titleElement = document.querySelector('h1');
+
         // 初始化
         function init() {
+            loadFromLoacl()
             startNewExercise();
-            
+
+            // 更新标题
+            titleElement.textContent = exerciseConfig.title;
+
             // 事件监听
             resetBtn.addEventListener('click', resetCurrentGroup);
+
+            // 设置弹窗事件监听
+            settingsBtn.addEventListener('click', openSettingsModal);
+            closeModalBtn.addEventListener('click', closeSettingsModal);
+            cancelBtn.addEventListener('click', closeSettingsModal);
+            saveBtn.addEventListener('click', saveSettings);
+
+            // 点击模态框外部关闭
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeSettingsModal();
+                }
+            });
+
+            // ESC键关闭模态框
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                    closeSettingsModal();
+                }
+            });
         }
-        
+
+        // 打开设置弹窗
+        function openSettingsModal() {
+            // 填充当前设置
+            exerciseTitleInput.value = exerciseConfig.title;
+            wordBankInput.value = wordBank.join('\n');
+            wordsPerGroupInput.value = exerciseConfig.wordsPerGroup;
+
+            // 显示弹窗
+            modalOverlay.classList.add('active');
+
+            // 防止背景滚动
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭设置弹窗
+        function closeSettingsModal() {
+            modalOverlay.classList.remove('active');
+
+            // 恢复背景滚动
+            document.body.style.overflow = '';
+        }
+
+        // 保存设置
+        function saveSettings() {
+            // 获取新标题
+            const newTitle = exerciseTitleInput.value.trim();
+            if (newTitle) {
+                exerciseConfig.title = newTitle;
+                titleElement.textContent = newTitle;
+            }
+
+            // 获取新字词库
+            const newWordBankText = wordBankInput.value.trim();
+            if (newWordBankText) {
+                const newWordBank = newWordBankText.split('\n')
+                    .map(word => word.trim())
+                    .filter(word => word.length > 0);
+
+                if (newWordBank.length > 0) {
+                    setWordBank(newWordBank);
+                }
+            }
+
+            // 获取每组字词数量
+            const newWordsPerGroup = parseInt(wordsPerGroupInput.value);
+            if (newWordsPerGroup >= 5 && newWordsPerGroup <= 20) {
+                exerciseConfig.wordsPerGroup = newWordsPerGroup;
+            }
+
+            // 重新开始练习
+            resetCurrentGroup();
+            startNewExercise();
+
+            // 关闭弹窗
+            closeSettingsModal();
+        }
+
+        function loadFromLoacl() {
+            console.log("loadFromLoacl")
+            scoreMap.set('a', 0)
+            scoreMap.set('s', 0)
+            scoreMap.set('d', 0)
+            scoreMap.set('f', 0)
+            scoreMap.set('g', 0)
+            scoreMap.set('h', 0)
+            scoreMap.set('j', 0)
+            scoreMap.set('k', 0)
+            scoreMap.set('l', 0)
+            scoreMap.set('z', 0)
+            scoreMap.set('x', 0)
+            scoreMap.set('c', 0)
+            scoreMap.set('v', 0)
+            scoreMap.set('g', 0)
+        }
+
         // 开始新的练习组
         function startNewExercise() {
             generateNewExercise();
             renderWords();
             startExercise();
         }
-        
+
         // 生成新的练习字词
         function generateNewExercise() {
             currentExercise = [];
-            for (let i = 0; i < 10; i++) {
-                const randomIndex = Math.floor(Math.random() * wordBank.length);
-                currentExercise.push(wordBank[randomIndex]);
+            wordBank.length = 0
+            // console.log("generateNewExercise errorSet size " + errorSet.size)
+            if (errorSet.size > 0) {
+                for (const item of errorSet.values()) {
+                    for (let i = 0; i < pealtyRepeat; i++) {
+                        currentExercise.push(item)
+                    }
+                    insertList.push(item)
+                }
+                errorSet.clear()
+                inError = true
+                console.log("generateNewExercise1 " + currentExercise)
+                return
+            } else {
+                inError = false
             }
+            // 预选20个字
+            let selectSet = new Set()
+            let diffCount = 0
+            scoreMap.forEach((v, k) => {
+                if (v < currentTarget && selectSet.size < 20) {
+                    diffCount += currentTarget - v
+                    selectSet.add(k)
+                }
+            });
+
+            if (diffCount < 10) {
+                currentTarget *= 2
+            }
+
+            // console.log("selectSet " + selectSet.size)
+
+            let list = []
+            for (const item of selectSet.values()) {
+                // console.log("iii " + item)
+                let score = scoreMap.get(item)
+                if (score < currentTarget) {
+                    for (let i = score; i < currentTarget; i++) {
+                        const randomIndex = Math.floor(Math.random() * list.length);
+                        list.splice(randomIndex, 0, item)
+                    }
+                }
+            }
+            // console.log("list " + list)
+            for (const item of insertList) {
+                const randomIndex = (Math.floor(Math.random() * list.length)) % 3;
+                list.splice(randomIndex, 0, item)
+            }
+            // console.log("list2 " + list)
+
+            const count = exerciseConfig.wordsPerGroup;
+
+            for (let i = 0; i < count; i++) {
+                currentExercise.push(list[0]);
+                list.splice(0, 1)
+            }
+            wordBank.length = 0
+            console.log("generateNewExercise2 " + currentExercise)
         }
-        
+
         // 渲染字词和输入框
         function renderWords() {
             wordsContainerEl.innerHTML = '';
-            
+
             currentExercise.forEach((word, index) => {
                 // 创建字词容器
                 const wordItem = document.createElement('div');
                 wordItem.className = 'word-item';
                 wordItem.id = `word-item-${index}`;
-                
+
                 // 创建字词文本
                 const wordText = document.createElement('div');
                 wordText.className = 'word-text';
                 wordText.textContent = word;
                 wordItem.appendChild(wordText);
-                
+
                 // 创建输入框
                 const wordInput = document.createElement('input');
                 wordInput.type = 'text';
@@ -319,13 +711,13 @@
                 wordInput.id = `word-input-${index}`;
                 wordInput.dataset.index = index;
                 wordInput.dataset.word = word;
-                
+
                 // 设置输入框宽度（根据字词长度）
                 const wordLength = word.length;
                 const minWidth = 60;
                 const width = Math.max(minWidth, wordLength * 30);
                 wordInput.style.width = `${width}px`;
-                
+
                 // 添加事件监听
                 wordInput.addEventListener('input', handleInput);
                 wordInput.addEventListener('keydown', handleKeyDown);
@@ -335,20 +727,21 @@
                 wordInput.addEventListener('compositionend', () => {
                     isComposition = false;
                 });
-                
+
                 // 焦点事件监听
                 wordInput.addEventListener('focus', () => {
                     // 禁止手动选择输入框，只能顺序输入
-                    if (index !== currentIndex) {
+
+                    if (index !== currentIndex && !modalOverlay.classList.contains('active')) {
                         wordInput.blur();
                         const currentInput = document.getElementById(`word-input-${currentIndex}`);
                         if (currentInput) currentInput.focus();
                     }
                 });
-                
+
                 // 失去焦点时检查
                 wordInput.addEventListener('blur', () => {
-                    if (index === currentIndex && isActive) {
+                    if (index === currentIndex && isActive && !modalOverlay.classList.contains('active')) {
                         setTimeout(() => {
                             const currentInput = document.getElementById(`word-input-${currentIndex}`);
                             if (currentInput && document.activeElement !== currentInput) {
@@ -357,19 +750,19 @@
                         }, 10);
                     }
                 });
-                
+
                 wordItem.appendChild(wordInput);
                 wordsContainerEl.appendChild(wordItem);
             });
         }
-        
+
         // 开始练习
         function startExercise() {
             isActive = true;
             currentIndex = 0;
-            completedCount = 0;
+            // completedCount = 0;
             hasErrorInCurrentInput = false;
-            
+
             // 启用第一个输入框
             const firstInput = document.getElementById('word-input-0');
             if (firstInput) {
@@ -378,7 +771,7 @@
                 firstInput.focus();
                 firstInput.value = '';
             }
-            
+
             // 禁用所有其他输入框
             for (let i = 1; i < currentExercise.length; i++) {
                 const inputEl = document.getElementById(`word-input-${i}`);
@@ -388,40 +781,40 @@
                     inputEl.value = '';
                 }
             }
-            
+
             updateStats();
         }
-        
+
         // 处理输入事件
         function handleInput(e) {
             if (!isActive) return;
-            
+
             const inputEl = e.target;
             const index = parseInt(inputEl.dataset.index);
             const value = inputEl.value;
-            
+
             if (index !== currentIndex) return;
-            
+
             // 如果当前输入已经错误，保持红色样式
             if (hasErrorInCurrentInput) {
                 inputEl.className = 'word-input incorrect';
             }
-            
+
             // 如果不是输入法组合状态，立即检查
             if (!isComposition) {
                 setTimeout(() => checkWord(index, value), 10);
             }
         }
-        
+
         // 处理按键事件
         function handleKeyDown(e) {
             if (!isActive) return;
-            console.info("key " + e.key)
+            // console.info("key " + e.key)
             const inputEl = e.target;
             const index = parseInt(inputEl.dataset.index);
-            
+
             if (index !== currentIndex) return;
-            
+
             // 删除键按下 - 立即判定为错误
             if (e.key === 'Backspace' || e.key === 'Delete') {
                 hasErrorInCurrentInput = true;
@@ -431,7 +824,7 @@
                 //e.preventDefault();
                 return;
             }
-            
+
             // 空格键按下 - 提交当前字词
             if (e.key === ' ') {
                 //e.preventDefault();
@@ -440,66 +833,66 @@
                 })
             }
         }
-        
+
         // 检查字词
         function checkWord(index, value, forceCheck = false) {
             if (!isActive || index !== currentIndex) return;
-            
+
             const inputEl = document.getElementById(`word-input-${index}`);
             const word = currentExercise[index];
-            console.info("word " + word + " value " + value + " hasErrorInCurrentInput " + hasErrorInCurrentInput)
-            
+            // console.info("word " + word + " value " + value + " hasErrorInCurrentInput " + hasErrorInCurrentInput)
+
             // 如果已经错误，保持红色
             if (hasErrorInCurrentInput) {
                 inputEl.className = 'word-input incorrect';
-                
+
                 // 检查是否现在输入正确了
                 if (value === word || (forceCheck && value.trim() === word)) {
                     // 输入正确，划掉字并跳转
                     inputEl.className = 'word-input incorrect';
                     inputEl.disabled = true;
                     inputEl.value = word;
-                    
-                    completedCount++;
+
+                    // completedCount++;
                     moveToNextInput();
                 }
                 console.info("error 1")
                 return;
             }
-            
+
             // 正常检查
             if (value === word || (forceCheck && value.trim() === word)) {
                 // 输入正确
                 inputEl.className = 'word-input correct';
                 inputEl.disabled = true;
                 inputEl.value = word;
-                
-                completedCount++;
+
+                // completedCount++;
                 moveToNextInput();
-                console.info("ok")
+                updateScore(word, true)
             } else if (value.length > 0) {
                 // 输入有内容但不正确
                 hasErrorInCurrentInput = true;
                 errorCount++;
                 inputEl.className = 'word-input incorrect';
                 updateStats();
-                console.info("error 2")
+                updateScore(word, false)
             }
         }
-        
+
         // 移动到下一个输入框
         function moveToNextInput() {
             hasErrorInCurrentInput = false;
-            
+
             // 禁用当前输入框
             const currentInput = document.getElementById(`word-input-${currentIndex}`);
             if (currentInput) {
                 currentInput.disabled = true;
             }
-            
+
             // 更新索引
             currentIndex++;
-            
+
             // 如果还有下一个输入框
             if (currentIndex < currentExercise.length) {
                 const nextInput = document.getElementById(`word-input-${currentIndex}`);
@@ -515,7 +908,7 @@
                 completeCurrentGroup();
             }
         }
-        
+
         // 重置当前组
         function resetCurrentGroup() {
             // 重置所有输入框
@@ -527,38 +920,38 @@
                     inputEl.disabled = i !== 0;
                 }
             }
-            
+
             // 重置状态
             currentIndex = 0;
             completedCount = 0;
             hasErrorInCurrentInput = false;
-            
+
             // 聚焦到第一个输入框
             const firstInput = document.getElementById('word-input-0');
             if (firstInput) {
                 firstInput.focus();
             }
-            
+
             updateStats();
         }
-        
+
         // 完成当前组
         function completeCurrentGroup() {
             isActive = false;
-            
+
             // 短暂延迟后自动开始下一组
             getNext();
         }
-        
+
         // =============== 对外接口 ===============
-        
+
         // 获取下一组练习
         function getNext() {
             groupCount++;
             startNewExercise();
             updateStats();
         }
-        
+
         // 获取当前统计数据
         function getStats() {
             return {
@@ -568,24 +961,55 @@
                 errorCount: errorCount
             };
         }
-        
+
         // 设置字词库
         function setWordBank(newWordBank) {
             wordBank.length = 0;
-            wordBank.push(...newWordBank);
+            // wordBank.push(...newWordBank);
+            scoreMap.clear()
+            for (const item of newWordBank) {
+                scoreMap.set(item, 0)
+            }
+            currentTarget = baseTarget
         }
-        
+
         // =============== 辅助函数 ===============
-        
+
         // 更新统计数据
         function updateStats() {
-            completedEl.textContent = `${completedCount}/${currentExercise.length}`;
+            const progress = scoreMap.size > 0 ? (completedCount / scoreMap.size) * currentTarget : 0;
+
+            // 格式化为百分比
+            const percentage = Math.min(100, Math.max(0, progress));
+            completedEl.textContent = `${percentage.toFixed(1)}%`;
             groupCountEl.textContent = groupCount;
             errorCountEl.textContent = errorCount;
         }
-        
+
+        function updateScore(item, right) {
+            console.log("updateScore " + item + "  " + right);
+            if (right) {
+                if (!inError) {
+                    scoreMap.set(item, scoreMap.get(item) + 1)
+                    completedCount++
+                }
+            } else {
+                if (!inError) {
+                    let score = scoreMap.get(item) - penalty
+                    if (score < 0) {
+                        score = 0
+                    }
+                    let diff = scoreMap.get(item) - score
+                    completedCount -= diff
+                    scoreMap.set(item, score)
+                }
+                errorSet.add(item)
+            }
+        }
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>
