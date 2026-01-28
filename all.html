@@ -646,16 +646,21 @@
             }
             // 预选20个字
             let selectSet = new Set()
-            let diffCount = 0
-            scoreMap.forEach((v, k) => {
-                if (v < currentTarget && selectSet.size < 20) {
-                    diffCount += currentTarget - v
-                    selectSet.add(k)
-                }
-            });
+            //let diffCount = 0
+            while (true) {
+                scoreMap.forEach((v, k) => {
+                    if (v < currentTarget && selectSet.size < 30) {
+                        //diffCount += currentTarget - v
+                        selectSet.add(k)
+                    }
+                });
 
-            if (diffCount < 10) {
-                currentTarget *= 2
+                if (selectSet.size < 10) {
+                    currentTarget *= 2
+                }
+                if(selectSet.size > 0) {
+                    break
+                }
             }
 
             // console.log("selectSet " + selectSet.size)
@@ -676,14 +681,27 @@
                 const randomIndex = (Math.floor(Math.random() * list.length)) % 3;
                 list.splice(randomIndex, 0, item)
             }
-            // console.log("list2 " + list)
+            //console.log("list2 " + list)
 
-            const count = exerciseConfig.wordsPerGroup;
-
-            for (let i = 0; i < count; i++) {
-                currentExercise.push(list[0]);
-                list.splice(0, 1)
+            let randomSet = new Set()
+            for(const item of list) {
+                randomSet.add(item)
             }
+            
+            const count = exerciseConfig.wordsPerGroup;
+            console.log("1")
+            for(const item of randomSet.values()) {
+                if(currentExercise.length > count) {
+                    break
+                }
+                currentExercise.push(item)
+            }
+            console.log("2")
+            
+            // for (let i = 0; i < count; i++) {
+            //     currentExercise.push(list[0]);
+            //     list.splice(0, 1)
+            // }
             wordBank.length = 0
             console.log("generateNewExercise2 " + currentExercise)
         }
@@ -987,7 +1005,7 @@
         }
 
         function updateScore(item, right) {
-            console.log("updateScore " + item + "  " + right);
+            //console.log("updateScore " + item + "  " + right);
             if (right) {
                 if (!inError) {
                     scoreMap.set(item, scoreMap.get(item) + 1)
